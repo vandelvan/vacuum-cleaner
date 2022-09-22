@@ -1,4 +1,5 @@
 import mesa
+import random as r
 
 
 class Dirt(mesa.Agent):
@@ -18,11 +19,7 @@ class VacuumCleanerAgent(mesa.Agent):
         self.points = 0
 
     def move(self):
-        possible_steps = self.model.grid.get_neighborhood(
-            self.pos, moore=True, include_center=False
-        )
-        new_position = self.random.choice(possible_steps)
-        self.model.grid.move_agent(self, new_position)
+        self.model.grid.move_agent(self,(1,0) if self.pos == (0,0) else (0,0))
         self.cost = self.cost + 1
 
     def vacuum(self, spot):
@@ -38,32 +35,38 @@ class VacuumCleanerAgent(mesa.Agent):
         return None
 
     def step(self):
+        print("-------------------")
         print("Before step:")
-        print("Agent No.", self.unique_id, "@:", self.pos)
+        print("Agent No.", self.unique_id+1, "@:", self.pos)
         print("In this cell:",
               self.model.grid.get_cell_list_contents([self.pos]))
         spot = self.isDirty()
         if spot is not None:
             self.vacuum(spot)
+            print("DIRTY")
+            print("Action: Vacuum")
         if not self.model.finish():
             self.move()
+            print("CLEAN")
+            print("Action: Move")
         print("After step:")
-        print("Agent No.", self.unique_id, "@:", self.pos)
+        print("Agent No.", self.unique_id+1, "@:", self.pos)
         print("In this cell:",
               self.model.grid.get_cell_list_contents([self.pos]))
+        print("-------------------")
 
 
 class VacuumCleanerModel(mesa.Model):
-    def __init__(self, N):
-        self.num_agents = N
+    def __init__(self):
+        self.num_agents = 1
         self.grid = mesa.space.MultiGrid(2, 1, True)
         self.schedule = mesa.time.RandomActivation(self)
-        for i in range(self.num_agents):
-            a = VacuumCleanerAgent(i, self)
-            self.schedule.add(a)
-            x = self.random.randrange(self.grid.width)
-            self.grid.place_agent(a, (x, 0))
-            self.grid.place_agent(Dirt(50, DirtModel()), (0, 0))
+        a = VacuumCleanerAgent(0, self)
+        self.schedule.add(a)
+        x = self.random.randrange(self.grid.width)
+        self.grid.place_agent(a, (x, 0))
+            #Random
+        self.grid.place_agent(Dirt(50, DirtModel()), (r.randint(0,1),0))
 
     def step(self):
         self.schedule.step()
@@ -73,6 +76,6 @@ class VacuumCleanerModel(mesa.Model):
         return not any(isinstance(x, Dirt) for x in objects)
 
 
-model = VacuumCleanerModel(1)
+model = VacuumCleanerModel()
 while not model.finish():
     model.step()
