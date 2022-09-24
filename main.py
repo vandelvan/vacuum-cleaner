@@ -15,17 +15,13 @@ class DirtModel(mesa.Model):
 class VacuumCleanerAgent(mesa.Agent):
     def __init__(self, unique_id, model):
         super().__init__(unique_id, model)
-        self.cost = 0
-        self.points = 0
 
     def move(self):
-        self.model.grid.move_agent(self,(1,0) if self.pos == (0,0) else (0,0))
-        self.cost = self.cost + 1
+        self.model.grid.move_agent(
+            self, (1, 0) if self.pos == (0, 0) else (0, 0))
 
     def vacuum(self, spot):
         self.model.grid.remove_agent(spot)
-        self.cost = self.cost + 1
-        self.points = self.points+1
 
     def isDirty(self):
         cell = self.model.grid.get_cell_list_contents([self.pos])
@@ -65,8 +61,17 @@ class VacuumCleanerModel(mesa.Model):
         self.schedule.add(a)
         x = self.random.randrange(self.grid.width)
         self.grid.place_agent(a, (x, 0))
-            #Random
-        self.grid.place_agent(Dirt(50, DirtModel()), (r.randint(0,1),0))
+        # Random
+        spots = r.randint(0, 2)
+        for i in range(spots):
+            x = self.random.randrange(self.grid.width)
+            cell = self.grid.get_cell_list_contents([(x, 0)])
+            prevspot = False
+            for j in cell:
+                if isinstance(j, Dirt):
+                    prevspot = True
+            if not prevspot:
+                self.grid.place_agent(Dirt(i, DirtModel()), (x, 0))
 
     def step(self):
         self.schedule.step()
