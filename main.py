@@ -19,6 +19,9 @@ class VacuumCleanerAgent(mesa.Agent):
     def move(self):
         self.model.grid.move_agent(
             self, (1, 0) if self.pos == (0, 0) else (0, 0))
+        if(self.pos==(0,0)):
+            return "left"
+        return "right"
 
     def vacuum(self, spot):
         self.model.grid.remove_agent(spot)
@@ -42,9 +45,9 @@ class VacuumCleanerAgent(mesa.Agent):
             print("DIRTY")
             print("Action: Vacuum")
         if not self.model.finish():
-            self.move()
+            dir=self.move()
             print("CLEAN")
-            print("Action: Move")
+            print("Action: Move to "+dir)
         print("After step:")
         print("Agent No.", self.unique_id+1, "@:", self.pos)
         print("In this cell:",
@@ -84,3 +87,5 @@ class VacuumCleanerModel(mesa.Model):
 model = VacuumCleanerModel()
 while not model.finish():
     model.step()
+print("Press ENTER to close")
+input()
