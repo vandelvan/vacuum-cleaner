@@ -2,6 +2,7 @@ import mesa
 import random as r
 
 
+
 class Dirt(mesa.Agent):
     def __init__(self, unique_id: int, model: "Model") -> None:
         super().__init__(unique_id, model)
@@ -15,6 +16,9 @@ class DirtModel(mesa.Model):
 class VacuumCleanerAgent(mesa.Agent):
     def __init__(self, unique_id, model):
         super().__init__(unique_id, model)
+        self.cleaned = 0
+        self.steps = 1
+
 
     def move(self):
         self.model.grid.move_agent(
@@ -44,20 +48,27 @@ class VacuumCleanerAgent(mesa.Agent):
             self.vacuum(spot)
             print("DIRTY")
             print("Action: Vacuum")
+            self.cleaned += 1
+            
         if not self.model.finish():
             dir=self.move()
             print("CLEAN")
             print("Action: Move to "+dir)
+            self.steps += 1
+
         print("After step:")
         print("Agent No.", self.unique_id+1, "@:", self.pos)
         print("In this cell:",
               self.model.grid.get_cell_list_contents([self.pos]))
+        
+        
+        print("Total succes percentage in this round: ", int(self.cleaned/self.steps*100), "%")
         print("-------------------")
 
 
 class VacuumCleanerModel(mesa.Model):
     def __init__(self):
-        self.num_agents = 1
+        self.steps = 1
         self.grid = mesa.space.MultiGrid(2, 1, True)
         self.schedule = mesa.time.RandomActivation(self)
         a = VacuumCleanerAgent(0, self)
@@ -87,5 +98,6 @@ class VacuumCleanerModel(mesa.Model):
 model = VacuumCleanerModel()
 while not model.finish():
     model.step()
+
 print("Press ENTER to close")
 input()
