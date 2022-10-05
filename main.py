@@ -18,6 +18,7 @@ class VacuumCleanerAgent(mesa.Agent):
         super().__init__(unique_id, model)
         self.cleaned = 0
         self.steps = 1
+        self.score = 0
 
 
     def move(self):
@@ -38,6 +39,7 @@ class VacuumCleanerAgent(mesa.Agent):
         return None
 
     def step(self):
+        
         print("-------------------")
         print("Before step:")
         print("Agent No.", self.unique_id+1, "@:", self.pos)
@@ -49,19 +51,22 @@ class VacuumCleanerAgent(mesa.Agent):
             print("DIRTY")
             print("Action: Vacuum")
             self.cleaned += 1
+            self.score +=1
+            
             
         if not self.model.finish():
             dir=self.move()
             print("CLEAN")
             print("Action: Move to "+dir)
             self.steps += 1
+            self.score -= 1
 
         print("After step:")
         print("Agent No.", self.unique_id+1, "@:", self.pos)
         print("In this cell:",
               self.model.grid.get_cell_list_contents([self.pos]))
         
-        
+        print("Score: "+ str(self.score))
         print("Total succes percentage in this round: ", int(self.cleaned/self.steps*100), "%")
         print("-------------------")
 
